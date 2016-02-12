@@ -6,7 +6,7 @@ Display a set of cards and user can swap horizontally to use it.
 
 # How to use - Option 1
 * Download the Swift Code folder on you Mac
-* Open spotify-like-welcome-screen.xcodeproj 
+* Open Cards_Layout.xcodeproj 
 * Run it
 
 # How to use - Option 2
@@ -14,13 +14,47 @@ Display a set of cards and user can swap horizontally to use it.
 * Copy the ViewController, elements from Story board and supporting files
 * Put it in your project and done.
 
-# Video Specification
-Currently have used 384 × 480.
+# Specification
+This sample is only for iphone. Can be extended for any IOS device.
 
-# How to get the video cropped.
-Should not be here but just for your reference.
-Trim using quicktime. To make it portrate version use iMovie. Make sure you use high quality export.
+#Secret Sauce
+So if you see the code its pretty simple.
+* We take a CollectionViewController
+* Change its property to scroll horizontally.
+* Remove the scroll bars
+* Resize the cell to fill the screen
+* Next to give the card swap like feature check the code in scrollViewWillEndDragging where i am recalculating the cell to display based on the amount of drag.
 
-Special thanks to Lauren Sieczkowski for the SOUNDS LIKE SUMMER with Erika Spring video which i used in the background.
-![Video](http://i.imgur.com/oCinvFO.png)
-[Video URL](https://vimeo.com/131502939)
+```
+func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+        
+        let pageWidth:Float = 310 + 25;
+        
+        let currentOffSet:Float = Float(scrollView.contentOffset.x)
+        
+        print(currentOffSet)
+        let targetOffSet:Float = Float(targetContentOffset.memory.x)
+        
+        print(targetOffSet)
+        var newTargetOffset:Float = 0
+        
+        if(targetOffSet > currentOffSet){
+            newTargetOffset = ceilf(currentOffSet / pageWidth) * pageWidth
+        }else{
+            newTargetOffset = floorf(currentOffSet / pageWidth) * pageWidth
+        }
+        
+        if(newTargetOffset < 0){
+            newTargetOffset = 0;
+        }else if (newTargetOffset > Float(scrollView.contentSize.width)){
+            newTargetOffset = Float(scrollView.contentSize.width)
+        }
+        
+        targetContentOffset.memory.x = CGFloat(currentOffSet)
+        scrollView.setContentOffset(CGPointMake(CGFloat(newTargetOffset), 0), animated: true)
+        
+    }
+```
+Catch here though is the pageWidth calculation which should match to the viewcontroller image
+
+
