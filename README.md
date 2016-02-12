@@ -1,8 +1,8 @@
 # Cards layout with horizontal scrolling
 Display a set of cards and user can swap horizontally to use it.
 
-# Screencast
-![Screen cast](http://giant.gfycat.com/HastyShadyGrouse.gif)
+# Screencast 
+![Screen cast](http://classictutorials.com/blog/wp-content/uploads/2016/02/gify.gif)
 
 # How to use - Option 1
 * Download the Swift Code folder on you Mac
@@ -57,4 +57,4 @@ func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: 
 ```
 Catch here though is the pageWidth calculation which should match to the viewcontroller image
 
-
+Discuss about it here: http://classictutorials.com/2016/02/card-like-horizontal-scrolling-using-swift-2/
