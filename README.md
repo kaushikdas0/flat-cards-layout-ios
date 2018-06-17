@@ -62,3 +62,49 @@ func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity
 Catch here though is the pageWidth calculation which should match to the viewcontroller image
 
 Discuss about it here: http://classictutorials.com/2016/02/card-like-horizontal-scrolling-using-swift-2/
+
+# Add Notification when card changes
+
+Initialise a variable on the ViewConteoller.
+
+var foucusedIndex: Int = 0
+
+```
+func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let pageWidth:Float = Float(self.view.frame.size.width - 40.0 + 10.0) // Your cell Width + Min Spacing for Lines
+        let currentOffSet:Float = Float(scrollView.contentOffset.x)
+        
+        if self.foucusedIndex != Int((currentOffSet / pageWidth).rounded(.toNearestOrAwayFromZero)) {
+            self.foucusedIndex = Int((currentOffSet / pageWidth).rounded(.toNearestOrAwayFromZero))
+            NotificationCenter.default.post(name: .didChangeActiveCard, object: nil, userInfo: ["activeView": self.foucusedIndex])
+        }
+        
+  }
+```
+
+add Observer on other views
+
+```
+NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedNotification(notification:)), name: .didChangeActiveCard, object: nil)
+
+```
+
+Add selector 
+
+```
+@objc func methodOfReceivedNotification(notification: Notification){
+        guard let userInfo = notification.userInfo, let activeView  = userInfo["activeView"] as? Int else {
+            print("No userInfo found in notification")
+            return
+        }
+    }
+
+```
+
+By the way do not forgot to remove observer
+
+```
+ deinit {
+        NotificationCenter.default.removeObserver(self, name: .didChangeActiveCard, object: nil)
+    }
+```
