@@ -39,33 +39,36 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
     }
 
-    func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    
         
-        let pageWidth:Float = 310 + 25;
-        
+        let pageWidth:Float = Float(self.view.frame.size.width - 40.0 + 10.0) // Your cell Width + Min Spacing for Lines
+
         let currentOffSet:Float = Float(scrollView.contentOffset.x)
-        
         print(currentOffSet)
-        let targetOffSet:Float = Float(targetContentOffset.memory.x)
-        
+        let targetOffSet:Float = Float(targetContentOffset.pointee.x)
+
         print(targetOffSet)
         var newTargetOffset:Float = 0
-        
-        if(targetOffSet > currentOffSet){
-            newTargetOffset = ceilf(currentOffSet / pageWidth) * pageWidth
-        }else{
-            newTargetOffset = floorf(currentOffSet / pageWidth) * pageWidth
+
+        if(targetOffSet > currentOffSet) {
+            newTargetOffset = ((currentOffSet / pageWidth).rounded(.up) * (pageWidth))
+            print(ceilf(currentOffSet / pageWidth))
+        } else if(targetOffSet < currentOffSet) {
+            newTargetOffset = ((currentOffSet / pageWidth).rounded(.down) * (pageWidth))
+            print(floorf(currentOffSet / pageWidth))
+        } else {
+            newTargetOffset = ((currentOffSet / pageWidth).rounded(.toNearestOrAwayFromZero) * (pageWidth))
         }
-        
-        if(newTargetOffset < 0){
+
+        if(newTargetOffset < 0) {
             newTargetOffset = 0;
-        }else if (newTargetOffset > Float(scrollView.contentSize.width)){
+        } else if (newTargetOffset > Float(scrollView.contentSize.width)) {
             newTargetOffset = Float(scrollView.contentSize.width)
         }
-        
-        targetContentOffset.memory.x = CGFloat(currentOffSet)
-        scrollView.setContentOffset(CGPointMake(CGFloat(newTargetOffset), 0), animated: true)
-        
+
+        targetContentOffset.pointee.x = CGFloat(currentOffSet)
+        scrollView.setContentOffset(CGPoint(x: Int(newTargetOffset), y: 0), animated: true)
     }
 
     

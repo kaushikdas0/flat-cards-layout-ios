@@ -26,35 +26,85 @@ So if you see the code its pretty simple.
 * Next to give the card swap like feature check the code in scrollViewWillEndDragging where i am recalculating the cell to display based on the amount of drag.
 
 ```
-func scrollViewWillEndDragging(scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+func scrollViewWillEndDragging(_ scrollView: UIScrollView, withVelocity velocity: CGPoint, targetContentOffset: UnsafeMutablePointer<CGPoint>) {
+    
         
-        let pageWidth:Float = 310 + 25;
-        
+        let pageWidth:Float = Float(self.view.frame.size.width - 40.0 + 10.0) // Your cell Width + Min Spacing for Lines
+
         let currentOffSet:Float = Float(scrollView.contentOffset.x)
-        
         print(currentOffSet)
-        let targetOffSet:Float = Float(targetContentOffset.memory.x)
-        
+        let targetOffSet:Float = Float(targetContentOffset.pointee.x)
+
         print(targetOffSet)
         var newTargetOffset:Float = 0
-        
-        if(targetOffSet > currentOffSet){
-            newTargetOffset = ceilf(currentOffSet / pageWidth) * pageWidth
-        }else{
-            newTargetOffset = floorf(currentOffSet / pageWidth) * pageWidth
+
+        if(targetOffSet > currentOffSet) {
+            newTargetOffset = ((currentOffSet / pageWidth).rounded(.up) * (pageWidth))
+            print(ceilf(currentOffSet / pageWidth))
+        } else if(targetOffSet < currentOffSet) {
+            newTargetOffset = ((currentOffSet / pageWidth).rounded(.down) * (pageWidth))
+            print(floorf(currentOffSet / pageWidth))
+        } else {
+            newTargetOffset = ((currentOffSet / pageWidth).rounded(.toNearestOrAwayFromZero) * (pageWidth))
         }
-        
+
         if(newTargetOffset < 0){
             newTargetOffset = 0;
         }else if (newTargetOffset > Float(scrollView.contentSize.width)){
             newTargetOffset = Float(scrollView.contentSize.width)
         }
-        
-        targetContentOffset.memory.x = CGFloat(currentOffSet)
-        scrollView.setContentOffset(CGPointMake(CGFloat(newTargetOffset), 0), animated: true)
-        
+
+        targetContentOffset.pointee.x = CGFloat(currentOffSet)
+        scrollView.setContentOffset(CGPoint(x: Int(newTargetOffset), y: 0), animated: true)
+
     }
 ```
 Catch here though is the pageWidth calculation which should match to the viewcontroller image
 
 Discuss about it here: http://classictutorials.com/2016/02/card-like-horizontal-scrolling-using-swift-2/
+
+# Add Notification when card changes
+
+Initialise a variable on the ViewConteoller.
+
+var foucusedIndex: Int = 0
+
+```
+func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let pageWidth:Float = Float(self.view.frame.size.width - 40.0 + 10.0) // Your cell Width + Min Spacing for Lines
+        let currentOffSet:Float = Float(scrollView.contentOffset.x)
+        
+        if self.foucusedIndex != Int((currentOffSet / pageWidth).rounded(.toNearestOrAwayFromZero)) {
+            self.foucusedIndex = Int((currentOffSet / pageWidth).rounded(.toNearestOrAwayFromZero))
+            NotificationCenter.default.post(name: .didChangeActiveCard, object: nil, userInfo: ["activeView": self.foucusedIndex])
+        }
+        
+  }
+```
+
+add Observer on other views
+
+```
+NotificationCenter.default.addObserver(self, selector: #selector(self.methodOfReceivedNotification(notification:)), name: .didChangeActiveCard, object: nil)
+
+```
+
+Add selector 
+
+```
+@objc func methodOfReceivedNotification(notification: Notification){
+        guard let userInfo = notification.userInfo, let activeView  = userInfo["activeView"] as? Int else {
+            print("No userInfo found in notification")
+            return
+        }
+    }
+
+```
+
+By the way do not forgot to remove observer
+
+```
+ deinit {
+        NotificationCenter.default.removeObserver(self, name: .didChangeActiveCard, object: nil)
+    }
+```
